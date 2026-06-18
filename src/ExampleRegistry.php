@@ -7,6 +7,7 @@ namespace App;
 use App\Examples\AskQuestion;
 use App\Examples\ExampleInterface;
 use App\Examples\Summarize;
+use App\Examples\Translate;
 
 /** Centrální registr příkladů. */
 final class ExampleRegistry
@@ -19,6 +20,7 @@ final class ExampleRegistry
         $list = [
             new AskQuestion(),
             new Summarize(),
+            new Translate(),
         ];
 
         foreach ($list as $i => $example) {
