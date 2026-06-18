@@ -6,6 +6,7 @@ namespace App;
 
 use App\Examples\AskQuestion;
 use App\Examples\ExampleInterface;
+use App\Examples\SentimentAnalysis;
 use App\Examples\Summarize;
 use App\Examples\Translate;
 
@@ -21,6 +22,7 @@ final class ExampleRegistry
             new AskQuestion(),
             new Summarize(),
             new Translate(),
+            new SentimentAnalysis(),
         ];
 
         foreach ($list as $i => $example) {
