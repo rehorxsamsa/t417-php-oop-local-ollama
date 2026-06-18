@@ -6,13 +6,14 @@ namespace App;
 
 use App\Examples\AskQuestion;
 use App\Examples\ChatWithMemory;
+use App\Examples\CodeGenerator;
 use App\Examples\ExampleInterface;
 use App\Examples\KeywordExtraction;
 use App\Examples\SentimentAnalysis;
 use App\Examples\Summarize;
 use App\Examples\Translate;
 
-/** Centrální registr příkladů. */
+/** Centrální registr 7 příkladů. */
 final class ExampleRegistry
 {
     /** @var array<string,ExampleInterface> */
@@ -27,6 +28,7 @@ final class ExampleRegistry
             new SentimentAnalysis(),
             new KeywordExtraction(),
             new ChatWithMemory(),
+            new CodeGenerator(),
         ];
 
         foreach ($list as $i => $example) {
