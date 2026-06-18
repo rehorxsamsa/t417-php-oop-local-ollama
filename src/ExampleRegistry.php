@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App;
 
 use App\Examples\AskQuestion;
+use App\Examples\ChatWithMemory;
 use App\Examples\ExampleInterface;
 use App\Examples\KeywordExtraction;
 use App\Examples\SentimentAnalysis;
@@ -25,6 +26,7 @@ final class ExampleRegistry
             new Translate(),
             new SentimentAnalysis(),
             new KeywordExtraction(),
+            new ChatWithMemory(),
         ];
 
         foreach ($list as $i => $example) {
