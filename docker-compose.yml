@@ -1,0 +1,46 @@
+services:
+  # Lokální LLM server (Ollama). Běží na CPU, model se stáhne při startu.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: php-llm-ollama-t417
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Jednorázový init: stáhne malý model (qwen2.5:0.5b ~400 MB).
+  ollama-pull:
+    image: ollama/ollama:latest
+    container_name: php-llm-pull-t417
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: ["sh", "-c", "ollama pull ${LLM_MODEL:-qwen2.5:0.5b}"]
+    restart: "no"
+
+  # PHP-OOP aplikace bez frameworku (vestavěný PHP server).
+  php:
+    build: .
+    container_name: php-llm-app-t417
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - LLM_MODEL=${LLM_MODEL:-qwen2.5:0.5b}
+    depends_on:
+      ollama:
+        condition: service_healthy
+    command: php -S 0.0.0.0:8080 -t /app/public
+
+volumes:
+  ollama_data:
