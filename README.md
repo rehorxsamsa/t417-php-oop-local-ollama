@@ -20,6 +20,7 @@ přes [Ollama](https://ollama.com). Vše běží v Dockeru na Ubuntu, model má 
 
 - Webové rozhraní (Bootstrap 5) + JSON API
 - CLI runner pro terminál
+- **Kvíz** (21 otázek) k procvičení znalostí o projektu – [`public/kviz.php`](public/kviz.php)
 
 ## Doporučený model
 
@@ -46,7 +47,8 @@ docker compose up -d
 docker compose logs -f ollama-pull
 
 # 4) Otevři v prohlížeči
-#    http://localhost:8080
+#    http://localhost:8080            # aplikace
+#    http://localhost:8080/kviz.php   # kvíz (21 otázek)
 ```
 
 ## Spuštění z terminálu (CLI)
@@ -76,7 +78,8 @@ php-llm/
 ├── docker-compose.yml      # Ollama + PHP + init pull
 ├── Dockerfile              # php:8.2-cli-alpine
 ├── public/
-│   └── index.php           # web UI + JSON API
+│   ├── index.php           # web UI + JSON API
+│   └── kviz.php            # samostatná stránka s kvízem (21 otázek)
 └── src/
     ├── autoload.php        # PSR-4 bez Composeru
     ├── OllamaClient.php     # OOP klient
