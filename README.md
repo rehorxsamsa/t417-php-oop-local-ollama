@@ -20,7 +20,7 @@ přes [Ollama](https://ollama.com). Vše běží v Dockeru na Ubuntu, model má 
 
 - Webové rozhraní (Bootstrap 5) + JSON API
 - CLI runner pro terminál
-- **Kvíz** (21 otázek) k procvičení znalostí o projektu – [`public/kviz.php`](public/kviz.php)
+- **Kvíz** (21 otázek) k procvičení znalostí o projektu – [`public/kviz.php`](http://localhost:8080/kviz.php)
 
 ## Doporučený model
 
