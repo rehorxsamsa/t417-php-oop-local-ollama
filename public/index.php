@@ -53,10 +53,15 @@ $examples = $registry->all();
     <div class="row justify-content-center">
         <div class="col-lg-9">
 
-            <h1 class="h3 mb-1">🦙 PHP-OOP + lokální LLM</h1>
-            <p class="text-muted">Čisté PHP 8.2 bez frameworku · Ollama · Docker · model
-                <code><?= htmlspecialchars(getenv('LLM_MODEL') ?: 'qwen2.5:0.5b') ?></code>
-            </p>
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="h3 mb-1">🦙 PHP-OOP + lokální LLM</h1>
+                    <p class="text-muted">Čisté PHP 8.2 bez frameworku · Ollama · Docker · model
+                        <code><?= htmlspecialchars(getenv('LLM_MODEL') ?: 'qwen2.5:0.5b') ?></code>
+                    </p>
+                </div>
+                <a href="kviz.php" class="btn btn-outline-primary btn-sm">🧠 Kvíz</a>
+            </div>
 
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
