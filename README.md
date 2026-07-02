@@ -85,6 +85,8 @@ php-llm/
     └── Examples/            # 7 tříd implementujících ExampleInterface
 ```
 
+📐 Podrobný popis vrstev, toku požadavku a návrhových principů najdeš v [ARCHITEKTURE.md](ARCHITEKTURE.md).
+
 ## Vypnutí
 
 ```bash
