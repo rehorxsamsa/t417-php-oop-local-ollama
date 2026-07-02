@@ -42,11 +42,23 @@ No Composer, no framework — everything is manual PSR-4 via `src/autoload.php` 
 **Request flow (CLI):** `src/cli.php` does the same lookup via argv.
 
 **Key classes:**
-- `OllamaClient` — cURL-only HTTP client wrapping Ollama's `/api/generate` (single-shot) and `/api/chat` (with message history). Built from env vars via `OllamaClient::fromEnv()`.
-- `ExampleRegistry` — maps string IDs `"1"`–`"7"` to `ExampleInterface` instances.
-- `ExampleInterface` — three methods: `title()`, `description()`, `run(OllamaClient, string): array{input:string,output:string}`.
+- `OllamaClient` (`src/OllamaClient.php`) — cURL-only HTTP client wrapping Ollama's `/api/generate` (single-shot, via `generate()`), `/api/chat` (with message history, via `chat()`), and `/api/tags` (via `listModels()`). Built from env vars with `OllamaClient::fromEnv()`; falls back to `http://localhost:11434` / `qwen2.5:0.5b`. Connection errors throw `RuntimeException`.
+- `ExampleRegistry` (`src/ExampleRegistry.php`) — maps string IDs `"1"`–`"7"` (assigned by array order) to `ExampleInterface` instances. `all()` returns the map, `get(id)` returns one or `null`.
+- `ExampleInterface` (`src/Examples/ExampleInterface.php`) — three methods: `title()`, `description()`, `run(OllamaClient, string): array{input:string,output:string}`. All examples live in `src/Examples/`.
 
-**Adding a new example:** implement `ExampleInterface`, add it to the `$list` array in `ExampleRegistry::__construct()`. No other wiring needed.
+**The 7 examples** (ID matches order in `ExampleRegistry::__construct()`):
+
+| ID | Title | Description |
+|----|-------|-------------|
+| 1 | Otázka a odpověď | Položí modelu libovolnou otázku a vrátí stručnou odpověď. |
+| 2 | Shrnutí textu | Zkrátí vložený text do 2–3 vět. |
+| 3 | Překlad | Přeloží text mezi češtinou a angličtinou. |
+| 4 | Analýza sentimentu | Vyhodnotí náladu textu a vrátí strukturovaný JSON. |
+| 5 | Klíčová slova | Vytáhne 5 nejdůležitějších klíčových slov z textu. |
+| 6 | Chat s pamětí | Demonstruje vícekolovou konverzaci, kde si model pamatuje kontext. |
+| 7 | Generátor kódu | Z popisu vygeneruje krátkou PHP funkci s komentářem. |
+
+**Adding a new example:** implement `ExampleInterface` in `src/Examples/`, add it to the `$list` array in `ExampleRegistry::__construct()`. IDs are auto-assigned by position, so no other wiring is needed.
 
 ## Environment
 
