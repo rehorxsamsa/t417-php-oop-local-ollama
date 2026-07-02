@@ -90,6 +90,16 @@ php-llm/
 
 📐 Podrobný popis vrstev, toku požadavku a návrhových principů najdeš v [ARCHITEKTURE.md](ARCHITEKTURE.md).
 
+## 7 zajímavostí o projektu
+
+1. **Nula závislostí.** Žádný Composer, žádný framework, žádná knihovna – celý HTTP klient pro Ollama stojí jen na vestavěném rozšíření cURL. `vendor/` složka tu vůbec neexistuje.
+2. **Vlastní PSR-4 autoloader na pár řádcích.** Namespace `App\` se mapuje na složku `src/` ručně v `src/autoload.php` – ukázka, že autoloading není žádná magie.
+3. **LLM běží kompletně lokálně a zdarma.** Díky Ollamě neopouští žádný text váš počítač, neplatí se za API a funguje to i offline. Výchozí model `qwen2.5:0.5b` má jen ~400 MB a zvládne ho i slabší CPU bez GPU.
+4. **Model se stáhne sám a jen jednou.** V `docker-compose.yml` je jednorázový init kontejner `ollama-pull`, který po startu stáhne zvolený model do trvalého volume – nic se neinstaluje ručně.
+5. **Přidat nový příklad je otázka dvou kroků.** Stačí implementovat `ExampleInterface` a přidat třídu do pole v `ExampleRegistry` – ID se přiřadí automaticky podle pořadí. Ukázková síla programování proti rozhraní.
+6. **Jeden a týž kód pro web, API i terminál.** Webové UI (`?...`), JSON API (`?api=run`) i CLI runner (`cli.php`) sdílejí naprosto stejnou logiku příkladů – liší se jen vstup a výstup.
+7. **Model si měníš jednou proměnnou.** Přepnutí mezi `qwen2.5:0.5b`, `gemma2:2b`, `llama3.2:1b` nebo `phi3:mini` je jen změna `LLM_MODEL` v `.env` – kód aplikace zůstává beze změny. Součástí je i **kvíz s 21 otázkami** na procvičení.
+
 ## Vypnutí
 
 ```bash
