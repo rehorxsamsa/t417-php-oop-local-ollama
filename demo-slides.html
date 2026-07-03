@@ -1,0 +1,515 @@
+<style>
+  :root {
+    /* Light — zeleno-šedý papír, "terminál za denního světla" */
+    --bg:        #ecefe8;
+    --surface:   #f6f8f2;
+    --ink:       #14201c;
+    --muted:     #55635c;
+    --line:      #d2d9cd;
+    --accent:    #0d6e59;
+    --accent-2:  #0a5647;
+    --on-accent: #f3fbf7;
+    --amber:     #a95f16;
+    --shadow:    0 24px 60px -30px rgba(20,32,28,.45);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #0e1412;
+      --surface:   #161f1c;
+      --ink:       #e9ece4;
+      --muted:     #94a29a;
+      --line:      #253230;
+      --accent:    #37c9a2;
+      --accent-2:  #5fd8b7;
+      --on-accent: #06110d;
+      --amber:     #e0a552;
+      --shadow:    0 30px 70px -34px rgba(0,0,0,.75);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#ecefe8; --surface:#f6f8f2; --ink:#14201c; --muted:#55635c; --line:#d2d9cd;
+    --accent:#0d6e59; --accent-2:#0a5647; --on-accent:#f3fbf7; --amber:#a95f16;
+    --shadow:0 24px 60px -30px rgba(20,32,28,.45);
+  }
+  :root[data-theme="dark"] {
+    --bg:#0e1412; --surface:#161f1c; --ink:#e9ece4; --muted:#94a29a; --line:#253230;
+    --accent:#37c9a2; --accent-2:#5fd8b7; --on-accent:#06110d; --amber:#e0a552;
+    --shadow:0 30px 70px -34px rgba(0,0,0,.75);
+  }
+
+  * { box-sizing: border-box; }
+
+  :root {
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+
+  .deck {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- slide frame ---- */
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2rem, 6vw, 6rem);
+    padding-bottom: clamp(4rem, 8vh, 6rem);
+    opacity: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .slide.active { display: flex; animation: rise .5s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes rise { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .slide.active { animation: none; }
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: clamp(.7rem, 1.1vw, .85rem);
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex; align-items: center; gap: .8rem;
+    margin-bottom: clamp(1rem, 2.5vh, 2rem);
+  }
+  .eyebrow::before {
+    content: ""; width: clamp(1.6rem, 4vw, 3rem); height: 2px;
+    background: var(--accent); display: inline-block;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    line-height: 1.02; letter-spacing: -.02em; font-weight: 800;
+    margin: 0; text-wrap: balance; max-width: 16ch;
+  }
+  h2 {
+    font-size: clamp(1.9rem, 5vw, 3.4rem);
+    line-height: 1.06; letter-spacing: -.015em; font-weight: 800;
+    margin: 0 0 clamp(1rem,2.5vh,1.6rem); text-wrap: balance; max-width: 18ch;
+  }
+  .lead {
+    font-size: clamp(1.1rem, 2.3vw, 1.7rem);
+    line-height: 1.4; color: var(--muted); max-width: 40ch; margin: 0;
+    font-weight: 400;
+  }
+  .lead strong { color: var(--ink); font-weight: 650; }
+  .kicker {
+    font-family: var(--mono); font-size: clamp(.75rem,1.3vw,.95rem);
+    color: var(--muted); margin-top: clamp(1.4rem,3vh,2.4rem); letter-spacing: .04em;
+  }
+
+  /* ---- title slide ---- */
+  .title h1 { max-width: 20ch; font-size: clamp(2.6rem, 7.5vw, 5.6rem); }
+  .title .lead { margin-top: 1.6rem; max-width: 46ch; }
+  .badge {
+    display: inline-flex; align-items:center; gap:.55rem;
+    font-family: var(--mono); font-size: .8rem; letter-spacing:.05em;
+    color: var(--accent); border:1px solid var(--line);
+    padding:.5rem .9rem; border-radius: 999px; background: var(--surface);
+    margin-bottom: 2rem; width: fit-content;
+  }
+  .badge .dot { width:.55rem; height:.55rem; border-radius:50%; background: var(--accent);
+    box-shadow: 0 0 0 0 var(--accent); animation: pulse 2.4s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);} 70%{box-shadow:0 0 0 10px transparent;} 100%{box-shadow:0 0 0 0 transparent;} }
+  @media (prefers-reduced-motion: reduce){ .badge .dot{ animation:none; } }
+
+  /* ---- big statement ---- */
+  .statement .big {
+    font-size: clamp(1.7rem, 4.4vw, 3rem); line-height: 1.18; font-weight: 700;
+    letter-spacing:-.01em; max-width: 24ch; text-wrap: balance; margin:0;
+  }
+  .statement .big em { color: var(--accent); font-style: normal; }
+
+  /* ---- point row ---- */
+  .points { display:flex; flex-wrap:wrap; gap: clamp(1rem,3vw,2.5rem); margin-top: clamp(1.6rem,4vh,2.6rem); }
+  .point { flex:1 1 12rem; }
+  .point .n { font-family:var(--mono); color:var(--amber); font-size:.85rem; letter-spacing:.05em; }
+  .point h3 { margin:.4rem 0 .3rem; font-size: clamp(1.05rem,2vw,1.35rem); font-weight:700; }
+  .point p { margin:0; color: var(--muted); font-size: clamp(.9rem,1.5vw,1.05rem); line-height:1.45; }
+
+  /* ---- comparison table ---- */
+  .cols { display:grid; grid-template-columns: repeat(3, 1fr); gap: clamp(.8rem,1.8vw,1.4rem); margin-top: clamp(1.4rem,3.5vh,2.2rem); }
+  @media (max-width: 720px){ .cols{ grid-template-columns:1fr; } }
+  .card {
+    background: var(--surface); border:1px solid var(--line); border-radius: 16px;
+    padding: clamp(1.1rem,2.2vw,1.6rem); box-shadow: var(--shadow);
+    display:flex; flex-direction:column; gap:.6rem;
+  }
+  .card .tag { font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color: var(--muted); }
+  .card h3 { margin:0; font-size: clamp(1.15rem,2.2vw,1.5rem); font-weight:800; }
+  .card p { margin:0; color: var(--muted); font-size: clamp(.88rem,1.5vw,1.02rem); line-height:1.45; }
+  .card .verdict { margin-top:auto; font-family:var(--mono); font-size:.8rem; font-weight:700; padding-top:.4rem; }
+  .card.on   { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+  .card.on   .verdict { color: var(--accent); }
+  .card.off  .verdict { color: var(--muted); }
+
+  /* ---- examples grid ---- */
+  .grid7 { display:grid; grid-template-columns: repeat(4, 1fr); gap:.7rem; margin-top: clamp(1.4rem,3.5vh,2.2rem); }
+  @media (max-width:820px){ .grid7{ grid-template-columns: repeat(2,1fr);} }
+  .ex {
+    background: var(--surface); border:1px solid var(--line); border-radius: 14px;
+    padding: 1rem 1.05rem; display:flex; flex-direction:column; gap:.35rem;
+  }
+  .ex .num { font-family:var(--mono); color: var(--accent); font-weight:700; font-size:.9rem; }
+  .ex .t { font-weight:700; font-size: clamp(.95rem,1.6vw,1.1rem); }
+  .ex .d { color: var(--muted); font-size:.82rem; line-height:1.35; }
+  .ex.star { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+
+  /* ---- demo cue cards ---- */
+  .demos { display:grid; grid-template-columns: repeat(2,1fr); gap: clamp(.8rem,1.8vw,1.3rem); margin-top: clamp(1.4rem,3.5vh,2rem); }
+  @media (max-width:760px){ .demos{ grid-template-columns:1fr; } }
+  .demo { background: var(--surface); border:1px solid var(--line); border-radius:16px; padding: clamp(1rem,2vw,1.4rem); box-shadow: var(--shadow); }
+  .demo .h { display:flex; align-items:baseline; gap:.6rem; margin-bottom:.6rem; }
+  .demo .h .l { font-family:var(--mono); color:var(--accent); font-weight:700; }
+  .demo .h h3 { margin:0; font-size: clamp(1.05rem,1.9vw,1.3rem); font-weight:800; }
+  .prompt {
+    font-family: var(--mono); font-size: clamp(.82rem,1.4vw,.95rem);
+    background: var(--bg); border:1px solid var(--line); border-radius:10px;
+    padding:.7rem .85rem; color: var(--ink); line-height:1.4; overflow-x:auto;
+  }
+  .prompt::before { content:"› "; color: var(--accent); }
+
+  /* ---- input → output cue (příklady 4/5/7) ---- */
+  .io { display:grid; grid-template-columns: 1fr 1.2fr; gap: clamp(.8rem,2vw,1.6rem);
+        align-items:start; margin-top: clamp(1.2rem,3vh,2rem); }
+  @media (max-width:780px){ .io{ grid-template-columns:1fr; } }
+  .io .col { display:flex; flex-direction:column; gap:.5rem; }
+  .io .label { font-family:var(--mono); font-size:.72rem; letter-spacing:.16em;
+        text-transform:uppercase; color: var(--muted); }
+  .io .label.out { color: var(--amber); }
+  .box {
+    font-family: var(--mono); font-size: clamp(.8rem,1.35vw,.95rem); line-height:1.5;
+    background: var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding: clamp(.8rem,1.6vw,1.1rem); white-space:pre-wrap; overflow-x:auto;
+    box-shadow: var(--shadow);
+  }
+  .box.in  { border-left:3px solid var(--accent); }
+  .box.res { border-left:3px solid var(--amber); color: var(--ink); }
+  .box .c { color: var(--muted); }
+  .io .note { grid-column:1 / -1; }
+
+  /* ---- peak / privacy slide ---- */
+  .peak { background: var(--accent); color: var(--on-accent); max-width:none; margin:0; padding-left: clamp(2rem,10vw,10rem); padding-right: clamp(2rem,10vw,10rem); }
+  .peak .eyebrow { color: var(--on-accent); }
+  .peak .eyebrow::before { background: var(--on-accent); }
+  .peak h2 { color: var(--on-accent); max-width: 22ch; }
+  .peak .lead { color: color-mix(in srgb, var(--on-accent) 80%, var(--accent)); max-width: 44ch; }
+  .peak .lead strong { color: var(--on-accent); }
+  .three { display:flex; gap: clamp(1rem,4vw,3rem); margin-top: clamp(1.6rem,4vh,2.6rem); flex-wrap:wrap; }
+  .three div { font-family: var(--mono); }
+  .three .w { font-size: clamp(1.2rem,2.6vw,1.9rem); font-weight:800; letter-spacing:-.01em; }
+  .three .s { opacity:.8; font-size:.85rem; letter-spacing:.05em; }
+
+  /* ---- under the hood ---- */
+  .hood { display:grid; grid-template-columns: repeat(3,1fr); gap: clamp(.8rem,1.8vw,1.3rem); margin-top: clamp(1.4rem,3.5vh,2.2rem); }
+  @media (max-width:760px){ .hood{ grid-template-columns:1fr; } }
+  .hood .card .ico { font-family:var(--mono); font-size:1.6rem; color: var(--accent); }
+  .hood .card .meta { font-family:var(--mono); font-size:.75rem; color: var(--muted); letter-spacing:.05em; }
+
+  /* ---- faq ---- */
+  .faq { display:grid; grid-template-columns: 1fr 1fr; gap: clamp(.7rem,1.6vw,1.2rem); margin-top: clamp(1.2rem,3vh,2rem); }
+  @media (max-width:760px){ .faq{ grid-template-columns:1fr; } }
+  .qa { border-left:3px solid var(--accent); padding:.2rem 0 .2rem 1rem; }
+  .qa .q { font-weight:700; font-size: clamp(.95rem,1.6vw,1.1rem); }
+  .qa .a { color: var(--muted); font-size: clamp(.85rem,1.45vw,1rem); line-height:1.4; margin-top:.2rem; }
+
+  /* ---- closing ---- */
+  .closing h1 { max-width: 24ch; }
+  .closing .lead { margin-top: 1.4rem; }
+
+  /* ---- chrome: footer nav + progress ---- */
+  .chrome {
+    position: fixed; left:0; right:0; bottom:0; z-index: 20;
+    display:flex; align-items:center; gap:1rem;
+    padding: .7rem clamp(1rem,4vw,2.4rem);
+    background: linear-gradient(to top, var(--bg) 60%, transparent);
+    font-family: var(--mono);
+  }
+  .progress { flex:1; height:3px; background: var(--line); border-radius:2px; overflow:hidden; }
+  .progress > i { display:block; height:100%; width:0; background: var(--accent); transition: width .4s cubic-bezier(.2,.7,.2,1); }
+  .counter { font-size:.8rem; color: var(--muted); letter-spacing:.08em; min-width: 4.5ch; text-align:right; }
+  .nav { display:flex; gap:.4rem; }
+  .nav button, .theme-btn {
+    font-family: var(--mono); font-size:.85rem; cursor:pointer;
+    background: var(--surface); color: var(--ink); border:1px solid var(--line);
+    width:2.2rem; height:2.2rem; border-radius:8px; display:grid; place-items:center;
+    transition: border-color .15s, color .15s;
+  }
+  .nav button:hover, .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav button:focus-visible, .theme-btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .hint { font-size:.72rem; color: var(--muted); letter-spacing:.06em; }
+  @media (max-width:640px){ .hint{ display:none; } }
+
+  /* edge click zones */
+  .zone { position: fixed; top:0; bottom:3.6rem; width: 14%; z-index:10; cursor:pointer; }
+  .zone.l { left:0; } .zone.r { right:0; }
+</style>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · TITUL -->
+  <section class="slide title active">
+    <span class="badge"><span class="dot"></span> LOKÁLNÍ AI · BĚŽÍ U VÁS</span>
+    <div class="eyebrow">Demo · prezentace pro úplného laika</div>
+    <h1>Umělá inteligence, kterou máte doma</h1>
+    <p class="lead">Program, který si umí povídat, překládat a shrnovat text — a to celé
+      <strong>na tomhle počítači</strong>. Bez internetu, bez cloudu, bez poplatků.</p>
+    <div class="kicker">PHP aplikace + malý jazykový model + Docker · ~15–20 min</div>
+  </section>
+
+  <!-- 2 · CO JE AI -->
+  <section class="slide">
+    <div class="eyebrow">01 · Základ</div>
+    <h2>Co je to vlastně „AI"?</h2>
+    <p class="lead"><strong>Velmi sečtělý pomocník,</strong> který přečetl obrovské množství
+      textů a naučil se z nich, jak na sebe slova navazují. Jako napovídání slov v mobilu —
+      jen mnohonásobně chytřejší.</p>
+    <div class="points">
+      <div class="point"><div class="n">a</div><h3>Není to kouzlo</h3><p>Je to statistika a hodně přečteného textu.</p></div>
+      <div class="point"><div class="n">b</div><h3>Nemá vlastní vůli</h3><p>Jen odpovídá na to, co dostane. Nemyslí, necítí.</p></div>
+      <div class="point"><div class="n">c</div><h3>Občas se splete</h3><p>Někdy si něco „vymyslí". Je to vlastnost, ne chyba.</p></div>
+    </div>
+  </section>
+
+  <!-- 3 · TŘI POJMY -->
+  <section class="slide">
+    <div class="eyebrow">02 · Ať v tom není zmatek</div>
+    <h2>AI, Claude, MCP — tři různé věci</h2>
+    <div class="cols">
+      <div class="card on">
+        <span class="tag">Jádro dema</span>
+        <h3>AI / jazykový model</h3>
+        <p>Program, který pracuje s textem — odpovídá, překládá, shrnuje.</p>
+        <span class="verdict">✓ tohle používáme</span>
+      </div>
+      <div class="card off">
+        <span class="tag">Služba na internetu</span>
+        <h3>Claude</h3>
+        <p>Placený AI asistent od firmy Anthropic, běží v cloudu.</p>
+        <span class="verdict">— dnes nepotřebujeme</span>
+      </div>
+      <div class="card off">
+        <span class="tag">Technický konektor</span>
+        <h3>MCP</h3>
+        <p>Způsob, jak AI napojit na další nástroje a data. Pokročilé.</p>
+        <span class="verdict">— dnes nepotřebujeme</span>
+      </div>
+    </div>
+    <p class="kicker">Pointa: „Ty služby na internetu posílají vaše data cizím serverům. Náš program běží celý tady."</p>
+  </section>
+
+  <!-- 4 · SEDM PŘÍKLADŮ -->
+  <section class="slide">
+    <div class="eyebrow">03 · Co uvidíte na obrazovce</div>
+    <h2>Jedna stránka, sedm ukázek</h2>
+    <div class="grid7">
+      <div class="ex star"><span class="num">1</span><span class="t">Otázka a odpověď</span><span class="d">Zeptáte se na cokoliv.</span></div>
+      <div class="ex star"><span class="num">2</span><span class="t">Shrnutí textu</span><span class="d">Dlouhý text → 2–3 věty.</span></div>
+      <div class="ex star"><span class="num">3</span><span class="t">Překlad</span><span class="d">Čeština ↔ angličtina.</span></div>
+      <div class="ex"><span class="num">4</span><span class="t">Sentiment</span><span class="d">Nálada textu jako data.</span></div>
+      <div class="ex"><span class="num">5</span><span class="t">Klíčová slova</span><span class="d">5 hlavních frází.</span></div>
+      <div class="ex star"><span class="num">6</span><span class="t">Chat s pamětí</span><span class="d">Pamatuje si kontext.</span></div>
+      <div class="ex"><span class="num">7</span><span class="t">Generátor kódu</span><span class="d">Napíše PHP funkci.</span></div>
+      <div class="ex" style="justify-content:center; border-style:dashed;"><span class="d">Vybereme 3–4 s největším „aha efektem".</span></div>
+    </div>
+  </section>
+
+  <!-- 5 · ŽIVÉ UKÁZKY -->
+  <section class="slide">
+    <div class="eyebrow">04 · Živě — otevři http://localhost:8080</div>
+    <h2>Čtyři ukázky, které chytnou</h2>
+    <div class="demos">
+      <div class="demo"><div class="h"><span class="l">A</span><h3>Otázka a odpověď</h3></div>
+        <div class="prompt">Co je to Docker a k čemu se používá?</div></div>
+      <div class="demo"><div class="h"><span class="l">B</span><h3>Překlad</h3></div>
+        <div class="prompt">Dnes je krásné počasí a jdu na procházku.</div></div>
+      <div class="demo"><div class="h"><span class="l">C</span><h3>Shrnutí textu</h3></div>
+        <div class="prompt">Vlož delší odstavec z článku nebo e-mailu…</div></div>
+      <div class="demo"><div class="h"><span class="l">D</span><h3>Chat s pamětí</h3></div>
+        <div class="prompt">Napiš víc zpráv — model naváže na předchozí.</div></div>
+    </div>
+  </section>
+
+  <!-- 5b · PŘÍKLAD 4 — SENTIMENT -->
+  <section class="slide">
+    <div class="eyebrow">04b · Živě — pro techničtější publikum</div>
+    <h2>Příklad 4 · Nálada textu jako data</h2>
+    <p class="lead">Výstup nemusí být věta pro člověka. Model umí vrátit <strong>strukturovaný
+      JSON</strong> — přesně to, co potřebuje další program.</p>
+    <div class="io">
+      <div class="col"><span class="label">Vstup</span>
+        <div class="box in">Ta nová kavárna je naprosto skvělá, obsluha byla milá a káva výborná!</div></div>
+      <div class="col"><span class="label out">Výstup (JSON)</span>
+        <div class="box res">{
+  "sentiment": "pozitivní",
+  "skore": 0.95,
+  "duvod": "chvála podniku, obsluhy i kávy"
+}</div></div>
+      <p class="kicker note">→ Tohle už si přečte jiná aplikace, ne jen člověk. Základ automatizace.</p>
+    </div>
+  </section>
+
+  <!-- 5c · PŘÍKLAD 5 — KLÍČOVÁ SLOVA -->
+  <section class="slide">
+    <div class="eyebrow">04c · Živě — pro techničtější publikum</div>
+    <h2>Příklad 5 · Pět nejdůležitějších frází</h2>
+    <p class="lead">Z libovolného textu vytáhne <strong>5 klíčových slov</strong> — hodí se
+      pro štítky, vyhledávání nebo rychlý přehled, o čem text je.</p>
+    <div class="io">
+      <div class="col"><span class="label">Vstup</span>
+        <div class="box in">Docker umožňuje běh aplikací v izolovaných kontejnerech, takže software funguje stejně na každém počítači bez složité instalace.</div></div>
+      <div class="col"><span class="label out">Výstup (seznam)</span>
+        <div class="box res">- Docker
+- kontejnery
+- izolace aplikací
+- přenositelnost
+- bez instalace</div></div>
+      <p class="kicker note">→ Zkus vlastní odstavec — třeba z e-mailu nebo článku.</p>
+    </div>
+  </section>
+
+  <!-- 5d · PŘÍKLAD 7 — GENERÁTOR KÓDU -->
+  <section class="slide">
+    <div class="eyebrow">04d · Živě — pro techničtější publikum</div>
+    <h2>Příklad 7 · Z věty rovnou PHP funkce</h2>
+    <p class="lead">Napíšete, co má funkce dělat — model vygeneruje <strong>hotový kód
+      i s komentářem.</strong> Pomocník pro programátora, ne náhrada.</p>
+    <div class="io">
+      <div class="col"><span class="label">Vstup (popis)</span>
+        <div class="box in">sečte dvě čísla</div></div>
+      <div class="col"><span class="label out">Výstup (PHP)</span>
+        <div class="box res"><span class="c">/** Sečte dvě čísla. */</span>
+function secti(float $a, float $b): float
+{
+    return $a + $b;
+}</div></div>
+      <p class="kicker note">→ CLI varianta: <span style="font-family:var(--mono)">php src/cli.php 7 "sečte dvě čísla"</span></p>
+    </div>
+  </section>
+
+  <!-- 6 · PEAK: VYPNU INTERNET -->
+  <section class="slide peak">
+    <div class="eyebrow">05 · Trumf</div>
+    <h2>A teď vypnu internet…</h2>
+    <p class="lead">Wi-Fi je pryč — a ono to <strong>pořád funguje.</strong> Ten „sečtělý
+      pomocník" není nikde na internetu, běží celý tady v počítači. Vaše data, dokumenty
+      ani otázky <strong>nikam neodcházejí.</strong></p>
+    <div class="three">
+      <div><div class="w">Soukromí</div><div class="s">nic se neodesílá</div></div>
+      <div><div class="w">Zdarma</div><div class="s">žádné poplatky za dotaz</div></div>
+      <div><div class="w">Offline</div><div class="s">bez závislosti na síti</div></div>
+    </div>
+  </section>
+
+  <!-- 7 · POD KAPOTOU -->
+  <section class="slide">
+    <div class="eyebrow">06 · Pod kapotou (volitelné)</div>
+    <h2>Tři díly, žádná magie</h2>
+    <div class="hood">
+      <div class="card"><div class="ico">◈</div><h3>Model</h3>
+        <p>Ten „sečtělý pomocník". Soubor o pár set MB, stažený jednou. Stará se o něj Ollama.</p>
+        <span class="meta">qwen2.5:0.5b · ~400 MB</span></div>
+      <div class="card"><div class="ico">⌁</div><h3>Aplikace (PHP)</h3>
+        <p>Dělá okno a tlačítka a posílá modelu otázky. Jako číšník: objednávku do kuchyně, hotový talíř zpět.</p>
+        <span class="meta">čisté OOP · bez frameworku</span></div>
+      <div class="card"><div class="ico">▦</div><h3>Docker</h3>
+        <p>Zabalí program se vším potřebným. Jako přepravní kontejner — na každé lodi uvnitř totéž.</p>
+        <span class="meta">docker compose up -d</span></div>
+    </div>
+  </section>
+
+  <!-- 8 · FAQ -->
+  <section class="slide">
+    <div class="eyebrow">07 · Časté otázky publika</div>
+    <h2>Na co se lidé ptají</h2>
+    <div class="faq">
+      <div class="qa"><div class="q">Špehuje mě to? Posílá něco ven?</div><div class="a">Ne. Model běží lokálně — offline ukázka to dokazuje.</div></div>
+      <div class="qa"><div class="q">Je to zadarmo?</div><div class="a">Ano. Model i software jsou open-source, žádné poplatky.</div></div>
+      <div class="qa"><div class="q">Je to stejné jako ChatGPT?</div><div class="a">Princip ano, ale ChatGPT běží na cizích serverech a je mnohem větší.</div></div>
+      <div class="qa"><div class="q">Nahradí to lidi?</div><div class="a">Je to nástroj — pomůže s rutinou, výstup je ale třeba kontrolovat.</div></div>
+      <div class="qa"><div class="q">Proč je to někdy pomalé?</div><div class="a">Použili jsme záměrně malý model, aby běžel i na slabém počítači.</div></div>
+      <div class="qa"><div class="q">Může se to splést?</div><div class="a">Ano, občas si „vymyslí" — proto pomocník, ne neomylný zdroj pravdy.</div></div>
+    </div>
+  </section>
+
+  <!-- 9 · ZÁVĚR -->
+  <section class="slide closing">
+    <div class="eyebrow">Závěr</div>
+    <h1>AI nemusí být tajemná služba někde na internetu.</h1>
+    <p class="lead">Může to být <strong>obyčejný program, který si spustíte doma</strong>
+      a plně mu rozumíte — u vás, bez internetu, zadarmo a soukromě.</p>
+    <div class="kicker">Děkuji za pozornost · demо: http://localhost:8080</div>
+  </section>
+
+</div>
+
+<!-- edge click zones -->
+<div class="zone l" id="zoneL" aria-hidden="true"></div>
+<div class="zone r" id="zoneR" aria-hidden="true"></div>
+
+<!-- chrome -->
+<div class="chrome">
+  <div class="nav">
+    <button id="prev" title="Předchozí (←)" aria-label="Předchozí">‹</button>
+    <button id="next" title="Další (→ / mezerník)" aria-label="Další">›</button>
+  </div>
+  <button class="theme-btn" id="theme" title="Světlý / tmavý motiv" aria-label="Přepnout motiv">◐</button>
+  <div class="progress"><i id="bar"></i></div>
+  <span class="hint">← →&nbsp; mezerník &nbsp;·&nbsp; F celá obrazovka</span>
+  <span class="counter" id="counter">1 / 9</span>
+</div>
+
+<script>
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var bar = document.getElementById('bar');
+    var counter = document.getElementById('counter');
+    var i = 0;
+
+    function show(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach(function (s, k) { s.classList.toggle('active', k === i); });
+      bar.style.width = ((i + 1) / slides.length * 100) + '%';
+      counter.textContent = (i + 1) + ' / ' + slides.length;
+      try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    }
+    function next() { show(i + 1); }
+    function prev() { show(i - 1); }
+
+    document.getElementById('next').addEventListener('click', next);
+    document.getElementById('prev').addEventListener('click', prev);
+    document.getElementById('zoneR').addEventListener('click', next);
+    document.getElementById('zoneL').addEventListener('click', prev);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+      else if (e.key === 'Home') { show(0); }
+      else if (e.key === 'End') { show(slides.length - 1); }
+      else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); }
+        else { document.exitFullscreen && document.exitFullscreen(); }
+      }
+    });
+
+    // theme toggle
+    var root = document.documentElement;
+    document.getElementById('theme').addEventListener('click', function () {
+      var cur = root.getAttribute('data-theme');
+      var dark = cur ? cur === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.setAttribute('data-theme', dark ? 'light' : 'dark');
+    });
+
+    var start = parseInt((location.hash || '').replace('#', ''), 10);
+    show(isNaN(start) ? 0 : start - 1);
+  })();
+</script>
