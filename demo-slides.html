@@ -251,6 +251,20 @@
   /* edge click zones */
   .zone { position: fixed; top:0; bottom:3.6rem; width: 14%; z-index:10; cursor:pointer; }
   .zone.l { left:0; } .zone.r { right:0; }
+
+  /* ---- presenter notes ---- */
+  #pnote {
+    position: fixed; left:0; right:0; bottom:3.6rem; z-index:30;
+    display:none; padding: .85rem clamp(1rem,4vw,2.4rem);
+    background: color-mix(in srgb, var(--amber) 14%, var(--surface));
+    border-top: 2px solid var(--amber);
+    font-size: clamp(.85rem,1.5vw,1.02rem); line-height:1.45; color: var(--ink);
+    box-shadow: 0 -18px 40px -24px rgba(0,0,0,.5);
+  }
+  #pnote.show { display:block; animation: rise .3s ease both; }
+  #pnote b { font-family:var(--mono); color: var(--amber); letter-spacing:.06em;
+    text-transform:uppercase; font-size:.72rem; display:block; margin-bottom:.3rem; }
+  .theme-btn.active { border-color: var(--amber); color: var(--amber); }
 </style>
 
 <div class="deck" id="deck">
@@ -339,7 +353,7 @@
   </section>
 
   <!-- 5b · PŘÍKLAD 4 — SENTIMENT -->
-  <section class="slide">
+  <section class="slide" data-notes="Malý model může u JSONu občas chybovat — přidat text navíc nebo vrátit rozbitou strukturu. Když se to stane, otoč to v poučení: „Právě proto to aplikace kontroluje a hlídá, jestli je JSON platný.“ Zdůrazni, že skóre (0.95) je jen odhad modelu, ne změřená hodnota.">
     <div class="eyebrow">04b · Živě — pro techničtější publikum</div>
     <h2>Příklad 4 · Nálada textu jako data</h2>
     <p class="lead">Výstup nemusí být věta pro člověka. Model umí vrátit <strong>strukturovaný
@@ -358,7 +372,7 @@
   </section>
 
   <!-- 5c · PŘÍKLAD 5 — KLÍČOVÁ SLOVA -->
-  <section class="slide">
+  <section class="slide" data-notes="Přesné znění a pořadí slov se může spuštění od spuštění lišit — to je normální, není to chyba. Nech publikum navrhnout vlastní odstavec, ať vidí, že to není připravený trik. Když model vrátí míň nebo víc než 5 položek, neřeš to — není to přesný počítač, ale odhad.">
     <div class="eyebrow">04c · Živě — pro techničtější publikum</div>
     <h2>Příklad 5 · Pět nejdůležitějších frází</h2>
     <p class="lead">Z libovolného textu vytáhne <strong>5 klíčových slov</strong> — hodí se
@@ -377,7 +391,7 @@
   </section>
 
   <!-- 5d · PŘÍKLAD 7 — GENERÁTOR KÓDU -->
-  <section class="slide">
+  <section class="slide" data-notes="U kódu chybuje malý model nejčastěji — může vrátit funkci s drobnou chybou nebo navíc povídání okolo. Neschovávej to: „Takhle to slouží jako pomocník programátorovi — návrh, který člověk zkontroluje a doladí, ne hotový produkt.“ Tip: s modelem phi3:mini (v .env) je kód znatelně lepší.">
     <div class="eyebrow">04d · Živě — pro techničtější publikum</div>
     <h2>Příklad 7 · Z věty rovnou PHP funkce</h2>
     <p class="lead">Napíšete, co má funkce dělat — model vygeneruje <strong>hotový kód
@@ -455,15 +469,19 @@ function secti(float $a, float $b): float
 <div class="zone l" id="zoneL" aria-hidden="true"></div>
 <div class="zone r" id="zoneR" aria-hidden="true"></div>
 
+<!-- presenter notes panel -->
+<div id="pnote"><b>Poznámka pro prezentujícího</b><span id="pnoteText"></span></div>
+
 <!-- chrome -->
 <div class="chrome">
   <div class="nav">
     <button id="prev" title="Předchozí (←)" aria-label="Předchozí">‹</button>
     <button id="next" title="Další (→ / mezerník)" aria-label="Další">›</button>
   </div>
+  <button class="theme-btn" id="notesBtn" title="Poznámky pro prezentujícího (N)" aria-label="Poznámky pro prezentujícího">🗒</button>
   <button class="theme-btn" id="theme" title="Světlý / tmavý motiv" aria-label="Přepnout motiv">◐</button>
   <div class="progress"><i id="bar"></i></div>
-  <span class="hint">← →&nbsp; mezerník &nbsp;·&nbsp; F celá obrazovka</span>
+  <span class="hint">← →&nbsp; mezerník &nbsp;·&nbsp; F celá obrazovka &nbsp;·&nbsp; N poznámky</span>
   <span class="counter" id="counter">1 / 9</span>
 </div>
 
@@ -472,15 +490,33 @@ function secti(float $a, float $b): float
     var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
     var bar = document.getElementById('bar');
     var counter = document.getElementById('counter');
+    var pnote = document.getElementById('pnote');
+    var pnoteText = document.getElementById('pnoteText');
+    var notesBtn = document.getElementById('notesBtn');
+    var notesOn = false;
     var i = 0;
+
+    function renderNotes() {
+      var note = slides[i].getAttribute('data-notes');
+      if (notesOn && note) { pnoteText.textContent = note; pnote.classList.add('show'); }
+      else { pnote.classList.remove('show'); }
+    }
 
     function show(n) {
       i = Math.max(0, Math.min(slides.length - 1, n));
       slides.forEach(function (s, k) { s.classList.toggle('active', k === i); });
       bar.style.width = ((i + 1) / slides.length * 100) + '%';
       counter.textContent = (i + 1) + ' / ' + slides.length;
+      renderNotes();
       try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
     }
+
+    function toggleNotes() {
+      notesOn = !notesOn;
+      notesBtn.classList.toggle('active', notesOn);
+      renderNotes();
+    }
+    notesBtn.addEventListener('click', toggleNotes);
     function next() { show(i + 1); }
     function prev() { show(i - 1); }
 
@@ -494,6 +530,7 @@ function secti(float $a, float $b): float
       else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
       else if (e.key === 'Home') { show(0); }
       else if (e.key === 'End') { show(slides.length - 1); }
+      else if (e.key === 'n' || e.key === 'N') { toggleNotes(); }
       else if (e.key === 'f' || e.key === 'F') {
         if (!document.fullscreenElement) { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); }
         else { document.exitFullscreen && document.exitFullscreen(); }
