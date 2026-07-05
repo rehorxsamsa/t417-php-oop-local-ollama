@@ -143,6 +143,7 @@ $payload = array_map(static fn(array $q): array => [
     <div class="row justify-content-center">
         <div class="col-lg-9">
 
+            <div class="text-muted small text-uppercase mb-1" style="letter-spacing:.05em">t417-php-oop-local-ollama</div>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h1 class="h3 mb-0">🧠 Kvíz k projektu</h1>
                 <a href="index.php" class="btn btn-outline-secondary btn-sm">← Zpět na aplikaci</a>

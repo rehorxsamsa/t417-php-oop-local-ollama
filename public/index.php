@@ -55,6 +55,7 @@ $examples = $registry->all();
 
             <div class="d-flex justify-content-between align-items-start">
                 <div>
+                    <div class="text-muted small text-uppercase mb-1" style="letter-spacing:.05em">t417-php-oop-local-ollama</div>
                     <h1 class="h3 mb-1">🦙 PHP-OOP + lokální LLM</h1>
                     <p class="text-muted">Čisté PHP 8.2 bez frameworku · Ollama · Docker · model
                         <code><?= htmlspecialchars(getenv('LLM_MODEL') ?: 'qwen2.5:0.5b') ?></code>
